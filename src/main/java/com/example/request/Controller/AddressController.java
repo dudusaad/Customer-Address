@@ -13,17 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/address")
+@RequestMapping("/api/address")
 public class AddressController {
 
     @Autowired
     private AddressService addressService;
 
-    @GetMapping(value = {"/getAddresses", "/{addressId}"})
+    @GetMapping(value = {"/getAllAddresses", "/{addressId}"})
     public ResponseEntity<List<Address>> getAddresses(@PathVariable(required = false) Long addressId) {
         List<Address> addresses = addressService.getAddressesDetails(addressId);
         if (addresses.isEmpty()) {

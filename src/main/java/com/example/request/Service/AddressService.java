@@ -29,19 +29,11 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
-    public Address update(Long id, Address address) {
-        Optional<Address> addressFound = addressRepository.findById(id);
-        if (addressFound.isPresent()) {
-            addressFound.get().setId(id);
-            addressFound.get().setZipCode(address.getZipCode());
-            addressFound.get().setNumber(address.getNumber());
-            return addressRepository.save(addressFound.get());
-        } else {
-            return null;
-        }
-    }
-
     public Address findByZipCodeAndNumber(String zipCode, int number) {
         return addressRepository.findByZipCodeAndNumber(zipCode, number);
+    }
+
+    public Optional<Address> findById(Long addressId){
+        return addressRepository.findById(addressId);
     }
 }

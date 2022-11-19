@@ -6,16 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/api/customer")
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
 
-    @GetMapping(value = {"/getCustomers", "/{documentId}"})
+    @GetMapping(value = {"/getAllCustomers", "/{documentId}"})
     public ResponseEntity<List<Customer>> getCustomer(@PathVariable(required = false) Long documentId) {
         List<Customer> customers = customerService.getCustomersDetails(documentId);
         if (customers.isEmpty()) {
@@ -25,7 +26,7 @@ public class CustomerController {
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/getCustomerByZipCode/{zipCode}")
+    @GetMapping(path = "/zipCode/{zipCode}")
     public ResponseEntity<List<Customer>> getCustomerByZipCode(@PathVariable("zipCode") String zipCode) {
 
         List<Customer> customers = customerService.getCustomersByZipCode(zipCode);
@@ -47,11 +48,13 @@ public class CustomerController {
     }
 
     @ResponseBody
-    @PostMapping(value = {"/create", "/create/{addressId}"})
+    @PostMapping(value = {"/create", "/create/address/{addressId}"})
     public ResponseEntity<Customer> create(@RequestBody Customer customer, @PathVariable(required = false) Long addressId) {
         try {
             Customer customerCreated = customerService.save(customer, addressId);
-            formatZipCode(customerCreated);
+            if(customerCreated.getAddresses() != null){
+                formatZipCode(Collections.singletonList(customerCreated));
+            }
             return new ResponseEntity<>(customerCreated, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,7 +67,7 @@ public class CustomerController {
         try {
             Customer customerAssign = customerService.assignAddressToCustomer(customerId, addressId);
             if (customerAssign != null) {
-                formatZipCode(customerAssign);
+                formatZipCode(Collections.singletonList((customerAssign)));
                 return new ResponseEntity<>(customerAssign, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -80,7 +83,7 @@ public class CustomerController {
         try {
             Customer customerUpdated = customerService.updateCustomer(customerId, customer);
             if (customerUpdated != null) {
-                formatZipCode(customerUpdated);
+                formatZipCode(Collections.singletonList((customerUpdated)));
                 return new ResponseEntity<>(customerUpdated, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -91,13 +94,7 @@ public class CustomerController {
     }
 
     private void formatZipCode(List<Customer> customers){
-       customers.forEach(customer -> customer.getAddresses().forEach(address -> address.
+        customers.forEach(customer -> customer.getAddresses().forEach(address -> address.
                 setZipCode(address.maskZipCode(address.getZipCode()))));
-    }
-
-    private void formatZipCode(Customer customer){
-        if(customer.getAddresses() != null) {
-            customer.getAddresses().forEach(address -> address.setZipCode(address.maskZipCode(address.getZipCode())));
-        }
     }
 }

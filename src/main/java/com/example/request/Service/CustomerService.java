@@ -2,12 +2,12 @@ package com.example.request.Service;
 
 import com.example.request.Models.Address;
 import com.example.request.Models.Customer;
-import com.example.request.Repository.AddressRepository;
 import com.example.request.Repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,7 +18,7 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private AddressRepository addressRepository;
+    private AddressService addressService;
 
     public List<Customer> getCustomersDetails(Long documentId) {
         if (documentId != null) {
@@ -43,32 +43,35 @@ public class CustomerService {
     public Customer save(Customer customer, Long addressId) {
         if (addressId != null) {
             Set<Address> addressSet = new HashSet<>();
-            Address address = addressRepository.findById(addressId).get();
-            addressSet.add(address);
+            Optional<Address> address = addressService.findById(addressId);
+            address.ifPresent(addressSet::add);
             customer.setAddresses(addressSet);
         }
         return customerRepository.save(customer);
     }
 
     public Customer updateCustomer(Long customerId, Customer customer) {
-        Customer customerDb = customerRepository.findById(customerId).get();
-        if (customerDb != null) {
-            customerDb.setName(customer.getName());
-            customerDb.setDocumentId(customer.getDocumentId());
-            customerDb.setAge(customer.getAge());
+        Optional<Customer> customerDb = customerRepository.findById(customerId);
+        if (customerDb.isPresent()) {
+            customerDb.get().setName(customer.getName());
+            customerDb.get().setDocumentId(customer.getDocumentId());
+            customerDb.get().setAge(customer.getAge());
 
-            return customerRepository.save(customerDb);
+            return customerRepository.save(customerDb.get());
         }
-        return customerDb;
+        return null;
     }
 
     public Customer assignAddressToCustomer(Long customerId, Long addressId) {
         Set<Address> addressSet = null;
-        Customer customer = customerRepository.findById(customerId).get();
-        Address address = addressRepository.findById(addressId).get();
-        addressSet = customer.getAddresses();
-        addressSet.add(address);
-        customer.setAddresses(addressSet);
-        return customerRepository.save(customer);
+        Optional<Customer> customer = customerRepository.findById(customerId);
+        Optional<Address> address = addressService.findById(addressId);
+        if(customer.isPresent() && address.isPresent()){
+            addressSet = customer.get().getAddresses();
+            addressSet.add(address.get());
+            customer.get().setAddresses(addressSet);
+            return customerRepository.save(customer.get());
+        }
+       return null;
     }
 }
