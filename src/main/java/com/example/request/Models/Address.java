@@ -3,7 +3,6 @@ package com.example.request.Models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,7 +25,7 @@ public class Address {
     private Long id;
 
     @Column(name = "zipCode", nullable = false)
-    private Long zipCode;
+    private String zipCode;
 
     @Column(name = "number")
     private int number;
@@ -47,4 +46,18 @@ public class Address {
     public int hashCode() {
         return Objects.hash(zipCode, number);
     }
+
+    public boolean validateZipCodeMask(String zipCode){
+        String regex = "^[0-9]{5}(?:-[0-9]{3})?$";
+        return zipCode.matches(regex);
+    }
+
+    public String maskZipCode(String zipCode){
+        return zipCode.replaceFirst("(\\d{5})(\\d{3})", "$1-$2");
+    }
+
+    public String replaceZipCode(String zipCode){
+        return zipCode.replaceAll("-", "");
+    }
+
 }
