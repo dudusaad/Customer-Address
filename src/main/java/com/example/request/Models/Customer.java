@@ -2,6 +2,7 @@ package com.example.request.Models;
 
 
 import lombok.Data;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,7 +40,6 @@ public class Customer {
 
     @Column(name = "lastUpdateInfo")
     private Date lastUpdateInfo;
-
 
     @ManyToMany
     @JoinTable(name = "customer_address",

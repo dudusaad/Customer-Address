@@ -4,6 +4,7 @@ import com.example.request.Models.Address;
 import com.example.request.Repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +16,13 @@ public class AddressService {
     private AddressRepository addressRepository;
 
     public List<Address> getAddressesDetails(Long addressId) {
+        List<Address> addresses;
         if (addressId != null) {
-            return addressRepository.findAllById(Collections.singleton(addressId));
+            addresses = addressRepository.findAllById(Collections.singleton(addressId));
+        } else {
+            addresses = addressRepository.findAll();
         }
-        return addressRepository.findAll();
+        return addresses;
     }
 
     public void deleteById(Long id) {
@@ -33,7 +37,7 @@ public class AddressService {
         return addressRepository.findByZipCodeAndNumber(zipCode, number);
     }
 
-    public Optional<Address> findById(Long addressId){
+    public Optional<Address> findById(Long addressId) {
         return addressRepository.findById(addressId);
     }
 }
